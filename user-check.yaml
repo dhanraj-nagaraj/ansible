@@ -1,0 +1,58 @@
+---
+ - hosts: all
+   become: yes
+   ignore_errors: yes
+   tasks:
+     - name: Checking for user exsistence
+       shell:
+         "getent passwd keerthi"
+       register:
+           "usercheck"
+
+     - name: Checking for user exsistence
+       set_fact:
+         con_user_ex: "{{ usercheck['stdout_lines']|length }}"
+
+     - name: User already exists
+       debug:
+         msg: "User already exsists in the server"
+       when:
+         - con_user_ex|int > 0
+
+
+     - name: User doest exists
+       debug:
+         msg: "User doesnt exsists in the server"
+       when:
+         - con_user_ex|int == 0
+    
+     - name: cpatuirng details of exsisting user
+       shell:
+         "getent passwd  keerthi;chage -l keerthi"
+       when:
+         - con_user_ex|int > 0
+       register: userout_exx
+
+
+     - name:  Displaying detaols of exsisting user
+       debug:
+         msg: "{{ userout_exx['stdout_lines'] }}"
+       when:
+         - con_user_ex|int > 0
+
+
+
+     - name: Creating user if doesnyt exosts
+       user:
+         name: keerthi
+         shell: /bin/bash
+         state: present
+       register: created_user_details
+       when:
+         - con_user_ex|int == 0
+
+     - name: Checking for user exzsistence
+       debug:
+          msg: "{{ created_user_details }}"
+       when:
+        - created_user_details is defined
