@@ -1,0 +1,58 @@
+1  yum install ansible -y
+    2  yum install pip -y
+    3  pip install ansible
+    4  ansible --version
+    5  ssh-keygen -t rsa
+    6  cd /root/.ssh/
+    7  ll
+    8  cat id_rsa.pub
+    9  ssh root@65.2.186.109
+   10  ansible-doc -l
+   11  ls -ltr
+   12  hostnamectl set-hostname ansible-master-server
+   13  bash
+   14  cd /root/.ssh/
+   15  ansible-doc shell
+   18  cd /root/.ssh/
+   19  ll
+   25  cat > host.txt
+   26  cat host.txt
+   29  ansible -i host.txt all -m shell -a "uptime"
+   30  ansible -i host.txt all -m shell -a "uptime;ifconfig"
+   31  ansible -i host.txt all -m shell -a "ifconfig"
+   32  ansible -i host.txt all -m shell -a "uptime;ifconfig|grep -i inet"
+   33  ansible -i host.txt all -m shell -a "uptime;ifconfig|grep -i inet|sed -n '1p'"
+   34  ansible -i host.txt all -m shell -a "uptime;ifconfig|grep -i inet|sed -n '1p';hostname"
+   35  ansible -i host.txt all -m shell -a "free"
+   36  ansible -i host.txt all -m shell -a "echo Below are the ram details of the server ;free|grep -i mem"
+   37  ansible -i host.txt all -m setup
+   39  ansible -i host.txt all -m file -a "dest=/tmp/dhanu.txt mode=777 owner=ec2-user state=touch"
+   40  ansible -i host.txt all -m shell -a "ls -ltr /tmp/dhanu.txt"
+   41  ansible -i host.txt all -m stat -a "dest=/tmp/dhanu.txt"
+   43  ansible -i host.txt all -m shell -a "echo dhanrajnagaraj >>/tmp/dhanu.txt"
+   44  ansible -i host.txt all -m shell -a "echo dhanrajnagaraj >>/tmp/dhanu.txt;cat dhanu.txt"
+   45  ansible -i host.txt all -m file -a "dest=/tmp/dhanu.txt mode=777 owner=ec2-user state=touch"
+   46  ansible -i host.txt all -m shell -a "echo dhanrajnagaraj >>/tmp/dhanu.txt;cat dhanu.txt"
+   47  ansible -i host.txt all -m shell -a "echo mechanical >>/tmp/dhanu.txt;echo below are content of file;cat /tmp/dhanu.txt"
+   49  ansible -i host.txt all -m file -a "dest=/tmp/dhanu.txt mode=777 owner=666"
+   50  ansible -i host.txt all -m shell -a "ls -ltr /tmp/dhanu.txt"
+   51  ansible -i hosts.txt all -m user -a "name=megharaj state=present shell=/bin/sh"
+   52  ansible -i host.txt all -m user -a "name=dhanraj state=present shell=/bin/sh"
+   53  ansible -i host.txt all -m user -a "name=megharaj state=present shell=/bin/sh"
+   54  ansible -i host.txt all -m user -a "name=pavanraj state=present shell=/bin/sh"
+   55  ansible -i host.txt all -m shell -a "getent passwd dhanraj;hostname"
+   56  ansible -i host.txt all -m shell -a "getent passwd megharaj;hostname"
+   57  ansible -i host.txt all -m shell -a "getent passwd pavanraj;hostname"
+   58  ansible -i host.txt all -m shell -a "cat /etc/passwd | grep -o "^[^:]*" | wc -l"
+   59  ansible -i host.txt all -m shell -a "cat /etc/passwd"
+   60  ansible -i host.txt all -m shell -a "name=megharaj state=present shell=/bin/sh"
+   62  ansible -i hosts.txt all -m yum -a "name=httpd state=installed"
+   63  ansible -i host.txt all -m yum -a "name=httpd state=installed"
+   64  ansible -i host.txt all -m shell -a "yum list httpd"
+   65  ansible -i host.txt all -m service -a "name=crond state=started"
+   66  ansible -i host.txt all -m shell -a "service crond status"
+   67  ansible -i host.txt all -m service -a "name=crond state=stopped"
+   68  ansible -i host.txt all -m shell -a "service crond status"
+   70  ansible -i host.txt all -m yum -a "name=httpd state=absent"
+   71  ansible -i host.txt all -m shell -a "yum list httpd"
+   72  ansible -i host.txt all -m yum -a "name=httpd state=installed"
