@@ -1,0 +1,71 @@
+memoeycheck.yaml
+---
+ - hosts: localhost
+   become: yes
+   ignore_errors: yes
+   tasks:
+     - name: Running memory command
+       shell:
+         "free"
+       register: memorydetails
+
+     - name: Displaying details of memory command
+       debug:
+         msg: "{{ memorydetails['stdout_lines'] }}"
+
+     - name: Capturing ram details
+       set_fact:
+           ramdetails: "{{ memorydetails['stdout_lines'][1].split(' ')|reject('match','^$') }}"
+           swapdetails: "{{ memorydetails['stdout_lines'][2].split(' ')|reject('match','^$') }}"
+
+
+     - name: Display ram memory details
+       debug:
+         msg: "{{ ramdetails }}"
+
+
+     - name: Displaying SWAP Memory details
+       debug:
+         msg: "{{ swapdetails }}"
+
+
+     - name: Capturing ram total ram used ram free
+       set_fact:
+               totalram: "{{ ramdetails[1]|int }}"
+               usedram: "{{ ramdetails[2]|int }}"
+
+     - name: Calculation usage percentage
+       set_fact:
+          ram_usage_percentage: "{{ usedram|int*100/totalram|int }}"
+
+
+     - name: displaying usage percentage
+       debug:
+         msg: "{{ ram_usage_percentage }}"
+
+
+     - name: Displaying Ram memory summary
+       debug:
+         msg: "Ram memory Utilzation percentage is {{ ram_usage_percentage }}% Total ram is {{ totalram }} usedram is {{ usedram }} free ram is {{ totalram|int - usedram|int }}"
+
+     - name: Memory issue doesnt exsusrs
+       debug:
+         msg: "Memory issue doesnt exists"
+       when:
+         - ram_usage_percentage|int <40
+
+     - name: Capturingprocess which consumes most of ram
+       shell:
+         "ps axo %mem,command,pid,user|sort -k1 -nr | head"
+       when:
+         - ram_usage_percentage|int > 40
+       register: processdetails
+
+
+     - name: Displaying Process details which consumes most of ram
+       debug:
+         msg:
+           - "Memory utilization issye exists"
+           - "{{ processdetails['stdout_lines'] }}"
+       when:
+         - ram_usage_percentage|int >40
