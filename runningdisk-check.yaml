@@ -1,0 +1,51 @@
+---
+ - hosts: localhost
+   ignore_errors: yes
+   become: yes
+   tasks:
+     - name: Running disk space check cpmmand
+       shell:
+         "df -Ph"
+       register: diskspaceout
+
+     - name: Displaying disk space output
+       set_fact:
+            part_detai: "{{ diskspaceout['stdout_lines'][1::]
+ }}"
+
+     - name: Checking space details
+       debug:
+          msg: "{{ item.split(' ') }}"
+       when:
+          - item.split(' ')[-2].replace('%','')|int >90
+       with_items:
+             - "{{ part_detai }}"
+       register: partition_issue
+
+
+     - name: Displayinh details
+       debug:
+         msg: "{{ partition_issue['results'] }}"
+
+
+     - name: Displaying details of all issue partition
+       debug:
+         msg: 
+          - "Partition {{ item['msg'][0] }} Hvae utiizatio  reached {{ item['msg'][-2] }} Mounted on directory {{ item['msg'][-1] }}"
+          - "======================"
+
+       with_items:
+           - "{{ partition_issue['results'] }}"
+       when:
+         - item.failed is defined 
+         
+    
+     - name: writing to file
+       lineinfile:
+             line: "Partition {{ item['msg'][0] }} Hvae utiizatio  reached {{ item['msg'][-2] }} Mounted on directory {{ item['msg'][-1] }}"
+             dest: /tmp/final_diskcheck.txt
+             create: yes        
+       with_items:
+           - "{{ partition_issue['results'] }}"
+       when:
+         - item.failed is defined
