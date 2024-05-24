@@ -1,0 +1,93 @@
+cat service_check.yaml
+---
+ - hosts: all
+   become: yes
+   ignore_errors: yes
+   vars:
+     stopped_services: []
+     running_service: []
+     service_list: ['httpd.service','sshd.service','crond.service','ip6tables.service','rpcbind.service']
+   tasks:
+     - name: Collecting All service
+       service_facts:
+       register: all_service_details
+
+     - name: Dispaying all service details
+       debug:
+         msg: 
+          - "{{ all_service_details['ansible_facts']['services'][item] }}"
+       with_items:
+             - "{{ service_list }}"
+       register: required_service_status
+
+
+     - name: Collecting Stooped services
+       set_fact:
+         required_service_details_final: "{{ required_service_status['results'] }}"
+
+
+     - name: Collecting running services
+       set_fact:
+          running_service: "{{ running_service + [item['msg'][0]['name']] }}"
+       when:
+        - item['msg'][0]['state'] == "running"
+       with_items:
+            - "{{ required_service_details_final }}"  
+
+
+
+     - name: Collecting Stopped services
+       set_fact:
+          stopped_services: "{{ stopped_services + [item['msg'][0]['name']] }}"
+       when:
+        - item['msg'][0]['state'] == "stopped"
+       with_items:
+            - "{{ required_service_details_final }}"
+
+
+
+     - name: Displaying Stooped services
+       debug:
+         msg: "{{ stopped_services }}"
+         
+     - name: Displaying running srevices
+       debug:
+         msg: "{{ running_service }}"
+
+
+     - name: Starting stopped services
+       service:
+          name: "{{ item }}"     
+          state: started
+       with_items:
+            - "{{ stopped_services }}"
+       register: started_stopped_services
+
+     - name: Dispkatinf output
+       debug:
+         msg: "{{ started_stopped_services }}"
+
+     - name: Checking service status post starting
+       shell:
+         "service {{ item }} status"
+       with_items:
+            - "{{ stopped_services }}"
+       register: pso_start_status
+
+
+     - name: Displayiong status post start
+       set_fact:
+          post_start_output: "{{ pso_start_status['results'] }}"
+
+     - name: Displaying each service status post starting
+       debug:
+         msg:
+          - "{{ item['rc'] }}" 
+          - "{{ item['item'] }}"
+       when:
+         - item['rc'] != 0
+       with_items:
+           - "{{ post_start_output }}"
+
+         
+root@praveen:/home/praveen/Documents/besant_ansible_examples/Aws_Oct_Weekend# 
